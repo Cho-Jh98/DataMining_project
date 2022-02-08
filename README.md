@@ -4,6 +4,11 @@
 
 ### re Module (정규식)
 
+1. re moduel 기초
+
+2. meta character
+
+
 ### Crawling
 
 ### KoNPLy
