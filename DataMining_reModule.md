@@ -39,10 +39,13 @@ print("4번 문장의 패턴 매칭 결과 :",result_matchObj_4)
 print(type(result_matchObj_1))
 ```
 
-> 1번 문장의 패턴 매칭 결과 : None\n
-> 2번 문장의 패턴 매칭 결과 : <re.Match object; span=(0, 3), match='kor'>\n
-> 3번 문장의 패턴 매칭 결과 : None\n
-> 4번 문장의 패턴 매칭 결과 : <re.Match object; span=(0, 3), match='kor'>\n
+> 1번 문장의 패턴 매칭 결과 : None
+> 
+> 2번 문장의 패턴 매칭 결과 : <re.Match object; span=(0, 3), match='kor'>
+> 
+> 3번 문장의 패턴 매칭 결과 : None
+> 
+> 4번 문장의 패턴 매칭 결과 : <re.Match object; span=(0, 3), match='kor'>
 >
 > <class 'NoneType'>
 
