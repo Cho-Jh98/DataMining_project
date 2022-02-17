@@ -4,7 +4,7 @@
 
 ### re Module (정규식)
 
-  [1. re 모듈 기초](https://github.com/Cho-Jh98/DataMining_project/blob/master/DataMining_reModule.md)
+  [1. re 모듈 기초](https://github.com/Cho-Jh98/DataMining_project/blob/master/1.%20DataMining_reModule.md)
 
   [2. meta character 1](https://github.com/Cho-Jh98/DataMining_project/blob/master/Datamining_MetaCharacter.md)
   
