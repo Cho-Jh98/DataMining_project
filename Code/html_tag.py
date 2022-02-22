@@ -11,154 +11,175 @@ import requests, re, pandas
 from bs4 import *
 from urllib.request import Request, urlopen
 
+"""
+    function : get_(PRESS)
+    Paremeter : URL (string) 
+    Return form : (
+                    title (string), 
+                    date (list -> 입력, 수정 날짜 고려),
+                    writer (string),
+                    text (list)
+                   )
+                   
+    주어진 기사 URL에서 기사 제목, 입력 및 수정 날짜, 기자, 본문 텍스트를 크롤링하는 함수입니다.
+"""
+### 동아일보 ###
 def get_DONGA(URL) :
-
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     donga_html = requests.get(URL)
     soup = BeautifulSoup(donga_html.text, 'html.parser')
 
-    date = soup.find_all('span', {'class':'date01'})
+    # 제목
     headline = soup.find_all('h1', {'class' : 'title'})
-
-
     title = headline[0].text # str, 제목
     
+    # 날짜
+    date = soup.find_all('span', {'class':'date01'})
     date_list = [] # 입력, 수정 날짜
     for day in date:
-        date_list.append(day)
+        date_list.append(day.text)
     
+    # 본문
     body_text = []
     
     body = soup.find_all('div', {'class' : 'article_txt'})
     for sentences in body:
-      by_sentence = re.findall(pattern, sentences.text)
+      body_text.append(sentences.text)
 
-    return title, date_list, by_sentence
+    return title, date_list, None, body_text  ## 기자는 없읍니다
 
 ### JTBC ###
-
 def get_JTBC(URL) :
-
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     jtbc_html = requests.get(URL)
     
     soup = BeautifulSoup(jtbc_html.text, 'html.parser')
 
+    # 제목
     headline = soup.find_all('h3', {'id' : 'jtbcBody'})
-    
     title = headline[0].text
-
+    
+    # 날짜
     published_date = soup.find_all('span', {'class':'i_date'})[0].text
     modified_date = soup.find_all('span', {'class':'m_date'})[0].text
-    
-    writer = soup.find_all('dd', {'class':'name'})[0].text
-    
     date_list = [published_date, modified_date]
     
+    # 기자
+    writer = soup.find_all('dd', {'class':'name'})[0].text
+    
+    # 본문
+    body_text = []
     
     body = soup.find_all('div', {'id' : 'article'})
     for sentences in body:
-        by_sentence = re.findall(pattern, str(sentences.text))
+        body_text.append(str(sentences.text))
     
-    return title, date_list, writer, by_sentence[:-1]
+    return title, date_list, writer, body_text
 
 ### 한겨래 ###
 def get_HANI(URL):
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
-    sub_title = []
     
     hani_html = requests.get(URL)
     soup = BeautifulSoup(hani_html.text, 'html.parser')
 
+    # 제목
     title = soup.find_all('span', {'class' : 'title'})[0].text
 
-    sub_titles = soup.find_all('div', {'class' : 'subtitle'})
-
+    # 날짜
+    date_list = []
     date_time = soup.find_all('p', {'class':'date-time'})[0].get_text(' ', strip = True)
-
+    date_list.append(date_time)
+    
+    # 기자
     writer = soup.find_all('div', {'class':'name'})
-
     name = writer[0].find_all('strong')[0].text
 
-    if sub_titles != None:
-        for s_tit in sub_titles:
-            sub_title.append(s_tit.get_text('\n', strip=True))
-
-    sub_title = sub_title[0].split('\n')
-
+    # 본문
+    body_text = []
     body = soup.find_all('div', {'class':'text'})
 
     for sentences in body:
-        by_sentence = re.findall(pattern, str(sentences.text))
-    return title, date_time, name, sub_title, by_sentence
+        body_text.append(str(sentences.text))
+        
+    return title, date_time, name, body_text
 
+### SBS ###
 def get_SBS(URL):
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     hani_html = requests.get(URL)
     soup = BeautifulSoup(hani_html.text, 'html.parser')
 
+    # 제목
     headline = soup.find_all('h3', {'id' : 'vmNewsTitle'})[0].text
 
+    # 날짜
+    date_list = []
     date_time = soup.find_all('span', {'class':'date'})
     date = date_time[0].find_all('span')[0].text
+    date_list.append(date)
+    
+    # 기자
     writer = soup.find_all('a', {'class':'name'})[0].text
 
+    # 본문
     body = soup.find_all('div', {'class':'text_area'})
 
     body_text = []
     for sentences in body:
-        by_sentence = re.findall(pattern, sentences.text)
-        body_text.extend(by_sentence)
+        body_text.append(sentences.text)
 
-    return headline, date, writer, body_text
+    return headline, date_list, writer, body_text
 
+### KBS ###
 def get_KBS(URL):
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     hani_html = requests.get(URL)
     soup = BeautifulSoup(hani_html.text, 'html.parser')
 
+    # 제목
     headline = soup.find_all('h5', {'class' : 'tit-s'})[0].text
 
+    # 날짜
     date_time = soup.find_all('em', {'class':'date'})
-    writer = soup.find_all('p', {'class':'name'})[0].get_text(' ', strip = True)
-
     date = [date_time[0].text, date_time[1].text] # 개시날짜, 수정날짜
-
+    
+    # 기자
+    writer = soup.find_all('p', {'class':'name'})[0].get_text(' ', strip = True)
+    
+    # 본문
     body = soup.find_all('div', {'class':'detail-body font-size'})
     body_text = []
     for sentences in body:
-        by_sentence = re.findall(pattern, str(sentences.text))
-        body_text.extend(by_sentence)
+        body_text.append(str(sentences.text))
 
     return headline, date, writer, body_text
 
+### MBC ###
 def get_MBC(URL):
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     hani_html = requests.get(URL)
     soup = BeautifulSoup(hani_html.text, 'html.parser')
 
+    # 제목
     headline = soup.find_all('h2', {'class' : 'art_title'})[0].text
 
+    # 날짜
     date_time = soup.find_all('span', {'class':'input'})
+    date = [date_time[0].text, date_time[1].text] # 작성 날짜, 수정 날짜
+    
+    # 기자
     writer = soup.find_all('span', {'class':'writer'})[0].get_text(' ', strip = True)
 
-    date = [date_time[0].text, date_time[1].text] # 작성 날짜, 수정 날짜
-
+    # 본문
     body = soup.find_all('div', {'class':'news_txt'})
     body_text = []
     for sentences in body:
-        by_sentence = re.findall(pattern, str(sentences.text))
-        body_text.extend(by_sentence)
+        body_text.append(str(sentences.text))
       
     return headline, date, writer, body_text
 
+### 중앙일보 ###
 def get_JOONGANG(URL):
-    pattern = re.compile(r'\s*(.+?\D[\.\n]+)\s*')
 
     res = urlopen(URL)
     soup = BeautifulSoup(res, 'html.parser')
@@ -178,12 +199,10 @@ def get_JOONGANG(URL):
     # 기자
     writer = body[0].find_all('div', {'class' : 'ab_byline'})[0].get_text()
 
-
     # 본문
     article = body[0].find_all('p')
     body_text = []
     for p in article:
-        body_text.extend(re.findall(pattern, p.text))
+        body_text.append(p.text)
     
     return headline, date, writer, body_text
-
