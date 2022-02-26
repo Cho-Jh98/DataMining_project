@@ -20,12 +20,16 @@ for url in url_list:
     sentences = get_info.divide_sentence(info)
     keyword_sentences = get_info.get_keyword(sentences, key_words)
 
+    print('-' * 80)
     print('언론사 :', info[0], end='\n')
     print('제목 :', info[1], end='\n')
-    print('날짜 :', info[2], end='\n')
+    print('날짜 :', end=' ')
+    if len(info[2]) == 1:
+        print(info[2][0])
+    else:
+        for i in range(len(info[2])):
+            print(info[2][i])
     print('작성자 :', info[3], end='\n')
     print('url :', url)
     for sentence in keyword_sentences:
         print(sentence.strip("\n"), end='\n')
-
-    print('-'*80)
