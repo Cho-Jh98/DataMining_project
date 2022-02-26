@@ -4,7 +4,7 @@ import requests, re, pandas, random
 
 def naver_crawling(key, page_num):
     url = 'https://search.naver.com/search.naver'
-    url_list = []
+    url_list = set()
     
     for page in range(page_num) :
         payload = {'where' : 'news', 'sm' : 'tab_pge', 'query' : key, 'start' : str(page) + '1'}
@@ -16,13 +16,13 @@ def naver_crawling(key, page_num):
         sub_list = soup.find_all('ul', {'class' : 'list_cluster'})
         
         for news in news_list:
-            url_list.append(news['href'])
+            url_list.add(news['href'])
         for cluster in sub_list:
             news = cluster.find_all('a', {'class' : 'elss sub_tit'})
             for i in news:
-                url_list.append(i['href'])
+                url_list.add(i['href'])
         
-    return url_list
+    return list(url_list)
 
 if __name__ == '__main__':
     
