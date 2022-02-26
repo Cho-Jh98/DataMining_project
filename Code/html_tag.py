@@ -62,14 +62,14 @@ def get_JTBC(URL):
 
     # 기자
     writer = soup.find_all('dd', {'class': 'name'})[0].text
-
+    writer = re.match(r'([\w]{2,4})\s', writer).group(0)
     # 본문
     body_text = []
 
-    body = soup.find_all('div', {'id': 'article'})
+    body = soup.find_all('div', {'class': 'article_content'})
     for sentences in body:
-        body_text.append(str(sentences.text))
-
+        body_text.append(sentences.get_text('\n', strip=True))
+    print(body_text)
     return title, date_list, writer, body_text
 
 
@@ -83,10 +83,12 @@ def get_HANI(URL):
 
     # 날짜
     date_list = []
-    date_time = soup.find_all('p', {'class': 'date-time'})[0].get_text(' ', strip=True)
+    date_time = soup.find_all('p', {'class': 'date-time'})[0].get_text()
+    print('dt', date_time)
     date_list.append(date_time)
+    print('dl', date_list)
 
-    # 기자
+    # 기자2022-02-04 04:59
     name = soup.find_all('div', {'class': 'name'})
     if len(name) == 0:
         text = soup.find_all('div', {'class': 'text'})[0]
@@ -107,7 +109,7 @@ def get_HANI(URL):
     for sentences in body:
         body_text.append(str(sentences.text))
 
-    return title, date_time, name, body_text
+    return title, date_list, name, body_text
 
 
 ### SBS ###
@@ -130,7 +132,7 @@ def get_SBS(URL):
     if len(writer) == 0:
         writer = '뉴스딱!'
     else:
-        writer = writer[0].text
+        writer = writer[0].text.strip()
 
     # 본문
     body = soup.find_all('div', {'class': 'text_area'})
@@ -163,7 +165,8 @@ def get_KBS(URL):
     body = soup.find_all('div', {'class': 'detail-body font-size'})
     body_text = []
     for sentences in body:
-        body_text.append(str(sentences.text))
+        sentences = sentences.get_text('\n', strip=True)
+        body_text.append(sentences)
 
     return headline, date, writer, body_text
 
@@ -202,7 +205,7 @@ def get_JOONGANG(URL):
 
     head = soup.find_all('header', {'class': 'article_header'})
     body = soup.find_all('article', {'class':'article'})
-
+    print(URL)
     # 제목
     headline = head[0].find_all('h1', {'class': 'headline'})[0].get_text().strip()
 
@@ -221,9 +224,10 @@ def get_JOONGANG(URL):
             writer = None
         else:
             writer = writer[0].text
+            writer = re.match(r'([\w]+)\n', writer).group(0).strip('\n')
     else:
-        writer = writer[0].text
-
+        writer = writer[0].text.strip('\n')
+        writer = re.match(r'([\w]+)\n', writer).group(0).strip('\n')
 
     # 본문
     article = body[0].find_all('p')
