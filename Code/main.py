@@ -2,10 +2,11 @@ import html_tag, naver_crawl, get_info
 import requests
 from bs4 import *
 
-print("검색할 키워드를 입력하세요 (',' 로 구분합니다)", end='\n')
-key_words = []
-key_words = input().split(', ') ### 이거 백퍼 잘못 입력한 경우 있으니까 제한조건 설정 하면 좋을듯?
-key = " ".join(key_words)
+print("검색할 키워드를 입력하세요 (스페이스 로 구분합니다)", end='\n')
+key = input() ### 이거 백퍼 잘못 입력한 경우 있으니까 제한조건 설정 하면 좋을듯?
+
+print("기사 안에서 찾고싶은 단어를 입력하세요 (,로 구문합니다)")
+key_words = input().split(', ')
 
 print("검색할 페이지 수를 입력하세요(숫자로 입력)")
 page_num = int(input())
@@ -19,7 +20,9 @@ for url in url_list:
         continue
     sentences = get_info.divide_sentence(info)
     keyword_sentences = get_info.get_keyword(sentences, key_words)
-
+    
+    if( len(keyword_sentences) == 0 ): # 매칭된 키워드가 없을경우 다음 기사로
+        continue
     print('-' * 80)
     print('언론사 :', info[0], end='\n')
     print('제목 :', info[1], end='\n')
@@ -31,5 +34,6 @@ for url in url_list:
             print(info[2][i])
     print('작성자 :', info[3], end='\n')
     print('url :', url)
+
     for sentence in keyword_sentences:
         print(sentence.strip("\n"), end='\n')
