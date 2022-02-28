@@ -69,7 +69,6 @@ def get_JTBC(URL):
     body = soup.find_all('div', {'class': 'article_content'})
     for sentences in body:
         body_text.append(sentences.get_text('\n', strip=True))
-    print(body_text)
     return title, date_list, writer, body_text
 
 
@@ -77,16 +76,13 @@ def get_JTBC(URL):
 def get_HANI(URL):
     hani_html = requests.get(URL)
     soup = BeautifulSoup(hani_html.text, 'html.parser')
-    print(URL)
     # 제목
     title = soup.find_all('span', {'class': 'title'})[0].text
 
     # 날짜
     date_list = []
     date_time = soup.find_all('p', {'class': 'date-time'})[0].get_text()
-    print('dt', date_time)
     date_list.append(date_time)
-    print('dl', date_list)
 
     # 기자2022-02-04 04:59
     name = soup.find_all('div', {'class': 'name'})
@@ -114,7 +110,6 @@ def get_HANI(URL):
 
 ### SBS ###
 def get_SBS(URL):
-    print(URL)
     sbs_html = requests.get(URL)
     soup = BeautifulSoup(sbs_html.text, 'html.parser')
 
@@ -216,7 +211,8 @@ def get_JOONGANG(URL):
         date.append(p.get_text())
 
     # 기자
-    writer = body[0].find_all('div', {'class': 'byline'})
+    writer = body[0].find_all('div', {'class': 'ab_byline'})
+    """
     if len(writer) == 0:
         writer = body[0].find_all('span', {'class': 'profile_name'})
 
@@ -224,13 +220,20 @@ def get_JOONGANG(URL):
             writer = None
         else:
             writer = writer[0].text
-            writer = re.match(r'([\w]+)\n', writer).group(0).strip('\n')
+            print(writer)
+            writer = re.match(r'([\w]+)\s{0,}', writer).group(0).strip('\n')
     else:
         writer = writer[0].text.strip('\n')
-        writer = re.match(r'([\w]+)\n', writer).group(0).strip('\n')
-
+        writer = re.match(r'([\w]+)\s', writer).group(0).strip('\n')
+    """
+    if len(writer) != 0:
+        print(writer[0].text)
+        writer = re.match(r'[\w·]+\s*', writer[0].text).group(0).strip()
+    else:
+        writer = None
+    
     # 본문
-    article = body[0].find_all('p')
+    article = body[0].find_all('div', {'id' : 'article_body'})[0].find_all('p', recursive=False)
     body_text = []
     for p in article:
         body_text.append(p.text)
